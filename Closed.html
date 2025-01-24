@@ -45,11 +45,15 @@
     <div id="result"></div>
     <button onclick="getOTP()" style="display:none;" id="otpBtn">Get OTP</button>
     <div id="otpResult"></div>
+    <button onclick="copyNumber()" style="display:none;" id="copyBtn">Copy Phone Number</button>
+    <button onclick="copyOTP()" style="display:none;" id="copyOTPBtn">Copy OTP</button>
 
     <script>
-        var _0x9f39=["\x65\x6E\x74\x65\x72","\x56\x61\x6C\x75\x65","\x66\x65\x74\x63\x68","\x68\x74\x74\x70\x73\x3A\x2F\x2F\x61\x70\x69\x2E\x74\x68\x75\x65\x73\x69\x6D\x2E\x61\x70\x69\x2F\x61\x70\x69\x2F\x67\x6F\x6F\x67\x6C\x65\x2F","\x77\x68\x69\x74\x65\x54\x65\x78\x74","\x61\x6C\x65\x72\x74","\x66\x6F\x72\x6D\x61\x74\x74\x65\x64\x20\x70\x68\x6F\x6E\x65\x20\x6E\x75\x6D\x62\x65\x72\x2E","\x63\x6F\x70\x79\x20\x74\x6F\x20\x63\x6C\x69\x70\x62\x6F\x61\x72\x64\x21","\x73\x74\x79\x6C\x65","\x69\x6E\x6C\x69\x6E\x65","\x64\x69\x73\x70\x6C\x61\x79","\x64\x69\x73\x70\x6C\x61\x79\x2D\x6E\x6F\x6E\x65","\x69\x66\x20\x64\x61\x74\x61\x2E\x70\x68\x6F\x6E\x65\x4E\x75\x6D\x62\x65\x72","\x6E\x61\x76\x69\x67\x61\x74\x6F\x72","\x6C\x6F\x67","\x3C\x2F\x73\x70\x61\x6E\x3E","\x68\x74\x74\x70\x73\x3A\x2F\x2F\x61\x70\x69\x2E\x74\x68\x75\x65\x73\x69\x6D\x2E\x61\x70\x69\x2F\x61\x70\x69\x2F\x6F\x72\x64\x65\x72\x2F","\x73\x74\x79\x6C\x65","\x63\x6F\x70\x79","\x66\x72\x6F\x6D\x43\x61\x6C\x6C\x62\x6F\x61\x72\x64","\x73\x74\x79\x6C\x65","\x2F","\x6D\x65\x73\x73\x61\x67\x65","\x66\x6F\x72\x6D\x61\x74\x74\x65\x64\x2E"];
-        var numberID = ''; 
-        var token = ''; 
+        let numberID = '';
+        let token = '';
+        let phoneNumber = '';
+        let otpCode = '';
+
         async function getNumber() {
             token = document.getElementById('token').value;
             if (!token) {
@@ -57,39 +61,53 @@
                 return;
             }
             try {
-                const response = await fetch(`${_0x9f39[3]}${token}`);
+                const response = await fetch(`https://api.thuesim.app/api/google/${token}`);
                 const data = await response.json();
-                if (data[_0x9f39[1]] && data[_0x9f39[2]]) {
-                    numberID = data[_0x9f39[2]];
-                    document.getElementById('result').innerHTML = `${_0x9f39[4]} ${data[_0x9f39[1]]}`;
+                if (data.phoneNumber && data.id) {
+                    numberID = data.id;
+                    phoneNumber = data.phoneNumber;
+                    document.getElementById('result').innerHTML = `Phone Number: ${data.phoneNumber}`;
                     document.getElementById('otpBtn').style.display = 'inline';
-                    navigator.clipboard.writeText(data[_0x9f39[1]]);
-                    alert(_0x9f39[5]);
+                    document.getElementById('copyBtn').style.display = 'inline';
                 } else {
-                    alert(_0x9f39[6]);
+                    alert('Failed to fetch phone number.');
                 }
             } catch (error) {
-                alert(_0x9f39[7] + error);
+                alert('Error fetching number: ' + error);
             }
         }
 
         async function getOTP() {
             if (!numberID || !token) {
-                alert(_0x9f39[8]);
+                alert('Invalid request. Please get a phone number first.');
                 return;
             }
             try {
-                const response = await fetch(`${_0x9f39[9]}${numberID}/${token}`);
+                const response = await fetch(`https://api.thuesim.app/api/order/${numberID}/${token}`);
                 const data = await response.json();
-                if (data[_0x9f39[1]]) {
-                    document.getElementById('otpResult').innerHTML = `${_0x9f39[10]}: ${data[_0x9f39[1]]}`;
-                    navigator.clipboard.writeText(data[_0x9f39[1]]);
-                    alert(_0x9f39[11]);
+                if (data.code) {
+                    otpCode = data.code;
+                    document.getElementById('otpResult').innerHTML = `OTP: ${data.code}`;
+                    document.getElementById('copyOTPBtn').style.display = 'inline';
                 } else {
-                    alert(_0x9f39[12]);
+                    alert('OTP not received yet. Try again.');
                 }
             } catch (error) {
-                alert(_0x9f39[13] + error);
+                alert('Error fetching OTP: ' + error);
+            }
+        }
+
+        function copyNumber() {
+            if (phoneNumber) {
+                navigator.clipboard.writeText(phoneNumber);
+                alert('Phone number copied to clipboard!');
+            }
+        }
+
+        function copyOTP() {
+            if (otpCode) {
+                navigator.clipboard.writeText(otpCode);
+                alert('OTP copied to clipboard!');
             }
         }
     </script>
